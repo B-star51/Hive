@@ -1,0 +1,25 @@
+{
+  "_comment": "Hive configuration. Flip exactly one data source to true. Azure/Sentinel are stubs for now.",
+  "dataSource": {
+    "use_local_logs": true,
+    "use_azure_graph": false,
+    "use_sentinel": false
+  },
+  "localLogs": {
+    "path": "data/sample-ad-logs.json"
+  },
+  "azureGraph": {
+    "tenantId": "",
+    "clientId": "",
+    "clientSecret": "",
+    "_note": "Implement Invoke-AzureGraphProvider to call /auditLogs/directoryAudits and /signIns"
+  },
+  "sentinel": {
+    "workspaceId": "",
+    "_note": "Implement Invoke-SentinelProvider to run KQL against Log Analytics"
+  },
+  "correlation": {
+    "windowMinutes": 60,
+    "incidentScoreThreshold": 50
+  }
+}

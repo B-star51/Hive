@@ -1,0 +1,81 @@
+[
+  {
+    "TimeCreated": "2026-06-12T09:02:11",
+    "EventID": 4624,
+    "Channel": "Security",
+    "Computer": "WKS-014",
+    "EventData": { "TargetUserName": "jdoe", "WorkstationName": "WKS-014", "LogonType": "2" }
+  },
+  {
+    "TimeCreated": "2026-06-12T09:15:00",
+    "EventID": 4624,
+    "Channel": "Security",
+    "Computer": "WKS-022",
+    "EventData": { "TargetUserName": "arossi", "WorkstationName": "WKS-022", "LogonType": "2" }
+  },
+  {
+    "TimeCreated": "2026-06-12T10:00:00",
+    "EventID": 4728,
+    "Channel": "Security",
+    "Computer": "DC01",
+    "EventData": { "SubjectUserName": "hradmin", "MemberName": "bsmith", "TargetUserName": "Marketing" }
+  },
+
+  {
+    "TimeCreated": "2026-06-12T02:14:33",
+    "EventID": 4728,
+    "Channel": "Security",
+    "Computer": "DC01",
+    "EventData": { "SubjectUserName": "svc-automation", "MemberName": "jdoe", "TargetUserName": "Domain Admins" }
+  },
+  {
+    "TimeCreated": "2026-06-12T02:15:01",
+    "EventID": 4672,
+    "Channel": "Security",
+    "Computer": "DC01",
+    "EventData": { "SubjectUserName": "jdoe" }
+  },
+  {
+    "TimeCreated": "2026-06-12T02:16:10",
+    "EventID": 4768,
+    "Channel": "Security",
+    "Computer": "DC01",
+    "EventData": { "TargetUserName": "jdoe", "IpAddress": "10.0.0.14" }
+  },
+  {
+    "TimeCreated": "2026-06-12T02:18:45",
+    "EventID": 4769,
+    "Channel": "Security",
+    "Computer": "DC01",
+    "EventData": { "TargetUserName": "jdoe", "IpAddress": "10.0.0.1", "ServiceName": "DC01$" }
+  },
+  {
+    "TimeCreated": "2026-06-12T02:20:05",
+    "EventID": 4624,
+    "Channel": "Security",
+    "Computer": "DC01",
+    "EventData": { "TargetUserName": "jdoe", "WorkstationName": "WKS-014", "LogonType": "3" }
+  },
+
+  {
+    "TimeCreated": "2026-06-12T03:01:00",
+    "EventID": 4625,
+    "Channel": "Security",
+    "Computer": "DC01",
+    "EventData": { "TargetUserName": "guest", "WorkstationName": "WKS-099", "LogonType": "3" }
+  },
+  {
+    "TimeCreated": "2026-06-12T03:01:20",
+    "EventID": 4625,
+    "Channel": "Security",
+    "Computer": "SQL01",
+    "EventData": { "TargetUserName": "guest", "WorkstationName": "WKS-099", "LogonType": "3" }
+  },
+  {
+    "TimeCreated": "2026-06-12T03:01:45",
+    "EventID": 4625,
+    "Channel": "Security",
+    "Computer": "FILESRV01",
+    "EventData": { "TargetUserName": "guest", "WorkstationName": "WKS-099", "LogonType": "3" }
+  }
+]

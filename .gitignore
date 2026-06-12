@@ -1,0 +1,17 @@
+# Azure Functions
+api/bin/
+api/obj/
+api/local.settings.json
+.azure/
+
+# Build / tooling
+node_modules/
+.vscode/
+*.user
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Hive runtime output
+report.json

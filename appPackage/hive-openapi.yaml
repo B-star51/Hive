@@ -1,0 +1,68 @@
+openapi: 3.0.3
+info:
+  title: Hive Watchdog API
+  description: Privilege-escalation report served by the Hive engine.
+  version: 1.0.0
+servers:
+  - url: https://YOUR-FUNCTION-APP.azurewebsites.net/api
+    description: Replace with your deployed Azure Function (or dev tunnel) URL.
+paths:
+  /hive/report:
+    get:
+      operationId: getHiveReport
+      summary: Get the latest Hive privilege-escalation report
+      description: Returns agent signals, correlated incidents, and recommended response actions.
+      responses:
+        '200':
+          description: A Hive report.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generatedAt:
+                    type: string
+                    description: ISO-8601 timestamp the report was generated.
+                  dataSource:
+                    type: string
+                    description: Active provider (LocalJsonProvider, AzureGraphProvider, SentinelProvider).
+                  eventCount:
+                    type: integer
+                  signals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        agent: { type: string }
+                        severity: { type: string }
+                        ruleId: { type: string }
+                        title: { type: string }
+                        description: { type: string }
+                        entity: { type: string }
+                        timestamp: { type: string }
+                  incidents:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entity: { type: string }
+                        severity: { type: string }
+                        score: { type: integer }
+                        escalated: { type: boolean }
+                        agentsFired:
+                          type: array
+                          items: { type: string }
+                        signalCount: { type: integer }
+                        firstSeen: { type: string }
+                        lastSeen: { type: string }
+                  responses:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entity: { type: string }
+                        severity: { type: string }
+                        score: { type: integer }
+                        recommendedActions:
+                          type: array
+                          items: { type: string }
