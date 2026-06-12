@@ -23,7 +23,9 @@ function Invoke-LateralMovementAgent {
                 -Description ("'$($e.TargetUser)' logged on to sensitive host '$target' from " +
                               "'$($e.SourceHost)'. Account is not in the admin baseline for that host.") `
                 -Entity $e.TargetUser -RelatedEntities @($e.SourceHost, $target) `
-                -Timestamp $e.Timestamp -Evidence $e
+                -Timestamp $e.Timestamp `
+                -MitreTactic 'Lateral Movement' -MitreTechnique 'T1021' -MitreTechniqueName 'Remote Services' `
+                -Evidence $e
         }
     }
 
@@ -35,7 +37,9 @@ function Invoke-LateralMovementAgent {
                 -Title "Failed logons across multiple hosts" `
                 -Description "'$($g.Name)' failed logon on $($hosts.Count) hosts: $($hosts -join ', ')." `
                 -Entity $g.Name -RelatedEntities $hosts `
-                -Timestamp ($g.Group.Timestamp | Measure-Object -Maximum).Maximum -Evidence $g.Group
+                -Timestamp ($g.Group.Timestamp | Measure-Object -Maximum).Maximum `
+                -MitreTactic 'Credential Access' -MitreTechnique 'T1110.003' -MitreTechniqueName 'Brute Force: Password Spraying' `
+                -Evidence $g.Group
         }
     }
 }

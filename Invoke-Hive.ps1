@@ -20,7 +20,8 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$ConfigPath
+    [string]$ConfigPath,
+    [switch]$Html        # also generate a standalone HTML dashboard and open it
 )
 
 $ErrorActionPreference = 'Stop'
@@ -38,6 +39,8 @@ if (-not $ConfigPath) { $ConfigPath = Join-Path $root 'config\settings.json' }
 . "$root\src\Agents\CorrelationAgent.ps1"
 . "$root\src\Agents\ResponseAgent.ps1"
 . "$root\src\Core\HiveCore.ps1"
+. "$root\src\Core\HiveReport.ps1"
+. "$root\src\Core\HiveHtmlReport.ps1"
 
 function Write-Section { param([string]$Text)
     Write-Host ""
@@ -74,6 +77,7 @@ if (-not $signals) {
 foreach ($s in ($signals | Sort-Object Timestamp)) {
     Write-Host ("[{0}] {1} {2}" -f $s.Severity, $s.RuleId, $s.Title) -ForegroundColor (Get-SeverityColor $s.Severity)
     Write-Host ("    {0:HH:mm} {1}" -f $s.Timestamp, $s.Description) -ForegroundColor Gray
+    Write-Host ("    ATT&CK: {0} ({1})" -f $s.MitreTechnique, $s.MitreTechniqueName) -ForegroundColor DarkCyan
 }
 
 # 3. Correlate into incidents
@@ -87,6 +91,14 @@ foreach ($i in $incidents) {
     Write-Host ("{0}  entity='{1}'  score={2}  agents={3}  [{4}]" -f `
         $i.Severity, $i.Entity, $i.Score, ($i.AgentsFired -join ','), $tag) `
         -ForegroundColor (Get-SeverityColor $i.Severity)
+    if ($i.Escalated) {
+        Write-Host ("    Tactics: {0}" -f ($i.Tactics -join ' -> ')) -ForegroundColor DarkCyan
+        Write-Host  "    Attack chain:" -ForegroundColor DarkGray
+        foreach ($step in $i.AttackChain) {
+            Write-Host ("      {0:HH:mm}  {1,-9} {2}  {3}" -f `
+                $step.Time, $step.Technique, $step.RuleId, $step.Step) -ForegroundColor Gray
+        }
+    }
 }
 
 # 4. Response recommendations
@@ -99,6 +111,16 @@ foreach ($r in $responses) {
     Write-Host ("Incident: '{0}'  (severity {1}, score {2})" -f $r.Entity, $r.Severity, $r.Score) -ForegroundColor White
     foreach ($a in $r.RecommendedActions) { Write-Host "    - $a" -ForegroundColor Gray }
     Write-Host ("    AutoContainment: {0} (advisory-only demo)" -f $r.AutoContainment) -ForegroundColor DarkGray
+}
+
+# Optional HTML dashboard
+if ($Html) {
+    $report   = Get-HiveReport -Config $config -RootPath $root
+    $htmlPath = Join-Path $root 'report.html'
+    New-HiveHtmlReport -Report $report -Path $htmlPath | Out-Null
+    Write-Section "HTML report"
+    Write-Host "Wrote $htmlPath" -ForegroundColor Green
+    Start-Process $htmlPath
 }
 
 Write-Host ""

@@ -29,13 +29,16 @@ function Get-HiveReport {
         eventCount  = $events.Count
         signals     = @($signals | ForEach-Object {
             [PSCustomObject]@{
-                agent       = $_.Agent
-                severity    = $_.Severity
-                ruleId      = $_.RuleId
-                title       = $_.Title
-                description = $_.Description
-                entity      = $_.Entity
-                timestamp   = $_.Timestamp.ToString('o')
+                agent          = $_.Agent
+                severity       = $_.Severity
+                ruleId         = $_.RuleId
+                title          = $_.Title
+                description    = $_.Description
+                entity         = $_.Entity
+                timestamp      = $_.Timestamp.ToString('o')
+                mitreTactic    = $_.MitreTactic
+                mitreTechnique = $_.MitreTechnique
+                mitreTechniqueName = $_.MitreTechniqueName
             }
         })
         incidents   = @($incidents | ForEach-Object {
@@ -45,6 +48,16 @@ function Get-HiveReport {
                 score       = $_.Score
                 escalated   = $_.Escalated
                 agentsFired = $_.AgentsFired
+                tactics     = $_.Tactics
+                attackChain = @($_.AttackChain | ForEach-Object {
+                    [PSCustomObject]@{
+                        time      = $_.Time.ToString('o')
+                        ruleId    = $_.RuleId
+                        tactic    = $_.Tactic
+                        technique = $_.Technique
+                        step      = $_.Step
+                    }
+                })
                 signalCount = $_.SignalCount
                 firstSeen   = $_.FirstSeen.ToString('o')
                 lastSeen    = $_.LastSeen.ToString('o')

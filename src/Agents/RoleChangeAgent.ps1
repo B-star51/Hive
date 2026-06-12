@@ -27,6 +27,8 @@ function Invoke-RoleChangeAgent {
             -Title "Privileged group membership change: $($e.TargetGroup)" `
             -Description "'$($e.TargetUser)' was added to '$($e.TargetGroup)' by '$($e.Actor)'.$suffix" `
             -Entity $e.TargetUser -RelatedEntities @($e.Actor, $e.TargetGroup) `
-            -Timestamp $e.Timestamp -Evidence $e
+            -Timestamp $e.Timestamp `
+            -MitreTactic 'Privilege Escalation' -MitreTechnique 'T1098' -MitreTechniqueName 'Account Manipulation' `
+            -Evidence $e
     }
 }

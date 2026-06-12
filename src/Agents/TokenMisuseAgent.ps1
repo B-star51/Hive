@@ -26,7 +26,9 @@ function Invoke-TokenMisuseAgent {
                 -Description ("TGT for '$($st.TargetUser)' was issued from $issuedHost but a service " +
                               "ticket was later requested from $($st.SourceHost) (possible pass-the-ticket).") `
                 -Entity $st.TargetUser -RelatedEntities @($issuedHost, $st.SourceHost) `
-                -Timestamp $st.Timestamp -Evidence $st
+                -Timestamp $st.Timestamp `
+                -MitreTactic 'Lateral Movement' -MitreTechnique 'T1550.003' -MitreTechniqueName 'Use Alternate Authentication Material: Pass the Ticket' `
+                -Evidence $st
         }
     }
 }

@@ -55,18 +55,24 @@ function New-HiveSignal {
         [string]$Entity,                 # primary entity for correlation (usually the user)
         [string[]]$RelatedEntities,
         [datetime]$Timestamp = (Get-Date),
+        [string]$MitreTactic,            # ATT&CK tactic, e.g. 'Privilege Escalation'
+        [string]$MitreTechnique,         # ATT&CK technique id, e.g. 'T1098'
+        [string]$MitreTechniqueName,     # e.g. 'Account Manipulation'
         $Evidence
     )
     [PSCustomObject]@{
-        Agent           = $Agent
-        Severity        = $Severity
-        RuleId          = $RuleId
-        Title           = $Title
-        Description     = $Description
-        Entity          = $Entity
-        RelatedEntities = $RelatedEntities
-        Timestamp       = $Timestamp
-        Evidence        = $Evidence
+        Agent              = $Agent
+        Severity           = $Severity
+        RuleId             = $RuleId
+        Title              = $Title
+        Description        = $Description
+        Entity             = $Entity
+        RelatedEntities    = $RelatedEntities
+        Timestamp          = $Timestamp
+        MitreTactic        = $MitreTactic
+        MitreTechnique     = $MitreTechnique
+        MitreTechniqueName = $MitreTechniqueName
+        Evidence           = $Evidence
     }
 }
 

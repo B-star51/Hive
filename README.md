@@ -1,3 +1,12 @@
+<p align="center">
+  <img src="docs/hero.svg" alt="Hive — Privilege Escalation Watchdog" width="100%">
+</p>
+
+<p align="center">
+  <b>Microsoft Agents League · Enterprise Agents (Microsoft 365 Copilot)</b><br>
+  <i>Catches privilege escalation before compromise · MITRE ATT&CK mapped · advisory-only</i>
+</p>
+
 # Hive — Privilege Escalation Watchdog
 
 A focused, multi-agent watchdog that detects **privilege-escalation precursors**
@@ -17,24 +26,46 @@ Hive is built around one rule: **agents depend on a normalized data contract,
 never on a data source.** This is what makes it a drop-in complement to
 Microsoft 365 security rather than a throwaway demo.
 
+```mermaid
+flowchart LR
+    U([User in Microsoft 365 Copilot]) -- "show me today's incidents" --> DA[Hive declarative agent<br/>appPackage/]
+    DA -- "GET /hive/report" --> API[Azure Function<br/>api/]
+
+    subgraph SRC[Data sources]
+        L[Synthetic JSON / Windows EVTX]
+        AZ[Azure AD / Graph *stub*]
+        SE[Sentinel / KQL *stub*]
+    end
+
+    subgraph PROV[Providers - swappable]
+        LP[LocalJsonProvider]
+        AP[AzureGraphProvider]
+        SP[SentinelProvider]
+    end
+
+    L --> LP
+    AZ --> AP
+    SE --> SP
+    LP & AP & SP -- "NormalizedEvent[]" --> ENG
+
+    subgraph ENG[Hive engine - source-agnostic]
+        RC[RoleChange Agent]
+        TM[TokenMisuse Agent]
+        LM[LateralMovement Agent]
+        RC & TM & LM -- signals --> CO[Correlation Agent]
+        CO -- incidents --> RE[Response Agent]
+    end
+
+    API --> ENG
+    RE -- "JSON report" --> API
+
+    classDef stub stroke-dasharray:5 5,opacity:0.7;
+    class AZ,SE,AP,SP stub;
 ```
-  USER (in Microsoft 365 Copilot)
-        |  "Show me today's privilege-escalation incidents"
-        v
-  +-----------------------------+        action: GET /hive/report
-  | Hive declarative agent      |  -------------------------------------+
-  | (appPackage/)               |                                       |
-  +-----------------------------+                                       v
-                                                       +--------- Hive engine (PowerShell) ---------+
-   DATA SOURCE        PROVIDER (swappable)             |  AGENTS (source-agnostic)                  |
-   -----------        -------------------              |  ----------------------                    |
-   Synthetic JSON     LocalJsonProvider  ----+         |  RoleChangeAgent  -----+                   |
-   Windows EVTX       (Get-WinEvent)         |         |  TokenMisuseAgent  ----+--> Correlation -> Response
-   Azure AD/Graph     AzureGraphProvider* ---+--> NormalizedEvent[] --> LateralMovementAgent -+   Agent       Agent
-   Sentinel/KQL       SentinelProvider*  ----+         |  (read NormalizedEvent)                    |
-                          (* = stub)                   +--------------------------------------------+
-                                                  served as JSON by an Azure Function (api/)
-```
+
+> Providers are the **only** code that knows a data source's format. Everything
+> right of `NormalizedEvent[]` is source-agnostic — that's why Azure AD / Sentinel
+> can be added later without touching agent logic.
 
 - **Abstracted interface** — providers are the only code that knows a source's
   format. They emit `NormalizedEvent` objects ([src/Core/EventModel.ps1](src/Core/EventModel.ps1)).
@@ -59,6 +90,35 @@ Microsoft 365 security rather than a throwaway demo.
 A single rule rarely escalates on its own — **correlation across agents** is what
 turns three weak signals into one Critical incident. That's the core idea.
 
+Every signal is mapped to a **MITRE ATT&CK** technique, and each escalated
+incident is reconstructed as a time-ordered **attack chain** so an analyst sees
+*how* the escalation unfolded:
+
+```
+jdoe  (Critical, score 205)   Privilege Escalation -> Lateral Movement
+  02:14  T1098      Added to Domain Admins (off-hours, by service account)
+  02:18  T1550.003  Kerberos ticket reused from a different host (pass-the-ticket)
+  02:20  T1021      Logged on to DC01 (sensitive host, non-baseline account)
+```
+
+```mermaid
+flowchart LR
+    A["02:14 · T1098<br/>Added to Domain Admins<br/><i>RoleChange Agent</i>"] -->
+    B["02:18 · T1550.003<br/>Kerberos ticket reuse<br/><i>TokenMisuse Agent</i>"] -->
+    C["02:20 · T1021<br/>Logon to DC01<br/><i>LateralMovement Agent</i>"] -->
+    D(["🚨 Incident: jdoe<br/>Critical · score 205<br/>3 agents corroborate"])
+```
+
+## How it maps to the judging criteria
+
+| Criterion | How Hive addresses it |
+|---|---|
+| **Accuracy & Relevance** | Detects real escalation TTPs (4728/4768/4769/4624 events); benign changes (Marketing group, daytime logons) correctly do **not** escalate — low false positives. |
+| **Reasoning & Multi-step** | Per-user correlation + time-ordered ATT&CK attack chain turns isolated alerts into one explained incident. |
+| **Creativity & Originality** | A watchdog that catches escalation *precursors* and lives inside M365 Copilot — complements, not duplicates, built-in detection. |
+| **User Experience** | Conversational Copilot agent + a self-contained HTML dashboard with severity badges and a kill-chain timeline. |
+| **Reliability & Safety** | Advisory-only (never auto-disables); 14 Pester tests prove deterministic behavior; agent instructed never to claim it executed containment. |
+
 ## Run it
 
 ```powershell
@@ -73,6 +133,16 @@ The attack scenarios are documented in [data/playbooks/scenarios.md](data/playbo
 If PowerShell blocks the script:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\Invoke-Hive.ps1
+```
+
+Generate a standalone **HTML dashboard** (great for the demo video):
+```powershell
+.\Invoke-Hive.ps1 -Html      # writes report.html and opens it
+```
+
+Run the **test suite** (proves the engine is deterministic):
+```powershell
+.\tests\Invoke-Tests.ps1      # installs Pester if needed, then runs 14 tests
 ```
 
 ## Microsoft 365 Copilot integration (Enterprise Agents category)
@@ -114,8 +184,10 @@ Hive/
     Core/EventModel.ps1      NormalizedEvent + HiveSignal contracts
     Core/HiveCore.ps1        provider dispatch + orchestration
     Core/HiveReport.ps1      JSON report shaped for the Copilot action
+    Core/HiveHtmlReport.ps1  standalone HTML dashboard renderer
     Providers/               LocalJson (real) + AzureGraph/Sentinel (stubs)
     Agents/                  the five agents
+  tests/                     Pester suite (14 tests) + runner
   appPackage/                Microsoft 365 Copilot declarative agent
     declarativeAgent.json    persona, starters, safety instructions
     ai-plugin.json           API plugin (getHiveReport action)

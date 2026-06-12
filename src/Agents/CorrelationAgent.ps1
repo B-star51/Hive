@@ -22,12 +22,28 @@ function Invoke-CorrelationAgent {
                     elseif ($score -ge $ScoreThreshold) { 'High' }
                     else { 'Low' }
 
+        # Order the contributing signals in time to reconstruct the kill chain -
+        # this is what turns isolated alerts into an explainable escalation story.
+        $ordered = $g.Group | Sort-Object Timestamp
+        $attackChain = @($ordered | ForEach-Object {
+            [PSCustomObject]@{
+                Time      = $_.Timestamp
+                RuleId    = $_.RuleId
+                Tactic    = $_.MitreTactic
+                Technique = $_.MitreTechnique
+                Step      = $_.Title
+            }
+        })
+        $tactics = @($ordered.MitreTactic | Where-Object { $_ } | Select-Object -Unique)
+
         [PSCustomObject]@{
             Entity      = $g.Name
             Score       = $score
             Severity    = $severity
             Escalated   = ($score -ge $ScoreThreshold)
             AgentsFired = $agents
+            Tactics     = $tactics
+            AttackChain = $attackChain
             SignalCount = $g.Count
             FirstSeen   = ($g.Group.Timestamp | Measure-Object -Minimum).Minimum
             LastSeen    = ($g.Group.Timestamp | Measure-Object -Maximum).Maximum
