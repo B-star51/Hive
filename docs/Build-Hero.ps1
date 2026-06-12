@@ -2,6 +2,8 @@
 # Theme: a hive (honeycomb) watching a privilege-escalation staircase climb
 # from Guest -> Domain Admin, intercepted by the Hive watchdog at the top.
 $ErrorActionPreference = 'Stop'
+# Force '.' as the decimal separator so SVG coordinates are valid on any locale.
+[System.Threading.Thread]::CurrentThread.CurrentCulture = [System.Globalization.CultureInfo]::InvariantCulture
 $W = 1280; $H = 640
 $sb = [System.Text.StringBuilder]::new()
 

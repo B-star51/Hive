@@ -173,6 +173,8 @@ returns incidents as JSON. The PowerShell engine is unchanged — it's the backe
 
 ## Project layout
 
+<p align="center"><img src="docs/project-layout.svg" alt="Hive project layout" width="100%"></p>
+
 ```
 Hive/
   Invoke-Hive.ps1            CLI entry point + console report
