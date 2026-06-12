@@ -1,0 +1,35 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.2/schema.json",
+  "schema_version": "v2.2",
+  "name_for_human": "Hive Watchdog API",
+  "description_for_human": "Returns correlated privilege-escalation incidents from the Hive engine.",
+  "description_for_model": "Retrieves the latest Hive privilege-escalation report, including individual agent signals, per-user correlated incidents with risk scores, and recommended containment actions. Use whenever the user asks about privilege escalation, role changes, token/Kerberos misuse, lateral movement, incidents, or recommended response.",
+  "namespace": "hive",
+  "functions": [
+    {
+      "name": "getHiveReport",
+      "description": "Get the latest Hive privilege-escalation report: agent signals, correlated incidents, and recommended response actions.",
+      "capabilities": {
+        "response_semantics": {
+          "data_path": "$.incidents",
+          "properties": {
+            "title": "$.entity",
+            "subtitle": "$.severity"
+          }
+        }
+      }
+    }
+  ],
+  "runtimes": [
+    {
+      "type": "OpenApi",
+      "auth": {
+        "type": "None"
+      },
+      "spec": {
+        "url": "hive-openapi.yaml"
+      },
+      "run_for_functions": ["getHiveReport"]
+    }
+  ]
+}
